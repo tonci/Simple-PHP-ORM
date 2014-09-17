@@ -1,5 +1,8 @@
 <?php
 require_once "lib/init.php";
-$orm = new Company;
-//print_r($orm->findById(1));
-print_r($orm->find('name=:name',array(':name'=>'Chaos Group')));
+$company = new Company;
+//print_r($company->findById(1));
+//print_r($company->findAll('name=:name',array(':name'=>'Izdirvam.bg')));
+//print_r($company->findAll());
+$company->id = 123;
+print_r($company);
