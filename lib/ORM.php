@@ -2,7 +2,9 @@
 class ORM {
     private $_adapter;
     protected $_entityTable;
-    private $_fieldsDetails;
+    protected $_fieldsDetails;
+    public $fileds;
+
     public function __construct()
     {
         $this->_adapter = new MysqlAdapter(array('localhost', 'root', '', 'chaos'));
@@ -24,6 +26,19 @@ class ORM {
         }else{
             $this->{$name} = $value;
         }
+    }
+
+    public function __call($name, $arguments)
+    {
+        $search_fields = explode('and', strtolower(str_replace('findBy', '', $name)));
+        for ($i=0; $i < count($search_fields); $i++) {
+            $criterias[] = $this->_adapter->escape($search_fields[$i]).'='.$this->_adapter->quoteValue($arguments[$i]);
+        }
+
+        if (!empty($criterias)) {
+            return $this->findAll(implode(' AND ', $criterias));
+        }
+        return null;
     }
 
     public function findById($id)
@@ -54,14 +69,15 @@ class ORM {
         }
                     
         return null;
-        
     }
 
     public function matchValues($query, $values)
     {
         foreach ((array)$values as $key => $value) {
+            if(strpos(':', $key) !== false)
             $query = str_replace($key, $this->_adapter->quoteValue($value), $query);
         }
+
         return $query;
     }
 

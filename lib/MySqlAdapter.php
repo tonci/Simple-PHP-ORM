@@ -46,6 +46,7 @@ class MysqlAdapter
                . (($limit) ? ' LIMIT ' . $limit : '')
                . (($offset && $limit) ? ' OFFSET ' . $offset : '')
                . (($order) ? ' ORDER BY ' . $order : '');
+               
         $this->query($query);
         return $this->countRows();
     }
@@ -90,6 +91,11 @@ class MysqlAdapter
             $value = "'" . mysqli_real_escape_string($this->_link, $value) . "'";
         }
         return $value;
+    }
+
+    public function escape($value)
+    {
+        return mysqli_real_escape_string($this->_link, $value);
     }
    
     /**
