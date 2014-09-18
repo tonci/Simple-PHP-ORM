@@ -3,7 +3,7 @@ class ORM {
     private $_adapter;
     protected $_entityTable;
     protected $_fieldsDetails;
-    public $fileds;
+    public $fields;
 
     public function __construct()
     {
@@ -54,6 +54,7 @@ class ORM {
     {   
         $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values));
         if ($data = $this->_adapter->fetch()) {
+            $this->mapValues($data);
             return $data;
         }
         return null;
@@ -71,11 +72,67 @@ class ORM {
         return null;
     }
 
+    public function delete($where='',$values='')
+    {
+        $PK = $this->getPK();
+        if (empty($where)) {
+            foreach ($PK as $pki) {
+                if (!$this->{$pki}) return false;
+                $where[] = $pki.'='.$this->{$pki};
+            }
+            return $this->_adapter->delete($this->_entityTable,implode(' AND ', $where));
+        }
+
+        if (is_int($where)) {
+            return $this->_adapter->delete($this->_entityTable,$PK[0].'='.$where);
+        }elseif (is_string($where)){
+            return $this->_adapter->delete($this->_entityTable,$this->matchValues($where,$values));
+        }
+    }
+
+    public function save()
+    {
+        if ($this->validate()) {
+            return $this->_adapter->insertUpdate($this->_entityTable, (array)$this->fields, (array)$this->getPK());
+        }
+    }
+
+    // TODO VALIDATION
+    public function validate($value='')
+    {
+        return true;
+    }
+
+    // TODO custome rules that should applly to validation
+    public function rules()
+    {
+        return array();
+    }
+
+    public function getPK()
+    {
+        return array_keys(array_filter($this->_fieldsDetails, array($this, 'filterPK')));
+    }
+
+    public function filterPK($row)
+    {
+        return $row['Key'] == 'PRI';
+    }
+
+    public function mapValues($values)
+    {
+        foreach ($values as $key => $value) {
+            if (isset($this->fields->{$key})){
+                $this->fields->{$key} = $value;
+            }
+        }
+    }
+
     public function matchValues($query, $values)
     {
         foreach ((array)$values as $key => $value) {
-            if(strpos(':', $key) !== false)
-            $query = str_replace($key, $this->_adapter->quoteValue($value), $query);
+            if(preg_match('/^:.+$/', $key))
+                $query = str_replace($key, $this->_adapter->quoteValue($value), $query);
         }
 
         return $query;

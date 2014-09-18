@@ -73,6 +73,22 @@ class MysqlAdapter
         return $this->getAffectedRows(); 
     }
 
+    public function insertUpdate($table, array $data, array $keys)
+    {
+        $fields = implode(',', array_keys($data));
+        $values = implode(',', array_map(array($this, 'quoteValue'), array_values($data)));
+        foreach ($data as $field => $value) {
+            if (!in_array($field, $keys))
+                $set[] = $field . '=' . $this->quoteValue($value);
+        }
+        $set = implode(',', $set);
+        
+        $query = 'INSERT INTO ' . $table . ' (' . $fields . ') ' . ' VALUES (' . $values . ')
+                    ON DUPLICATE KEY UPDATE '.$set;
+        $this->query($query);
+        return $this->getInsertId();
+    }
+
     public function delete($table, $where = '')
     {
         $query = 'DELETE FROM ' . $table
