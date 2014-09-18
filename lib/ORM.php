@@ -40,16 +40,7 @@ class ORM {
         }
         return null;
     }
-
-    public function findById($id)
-    {
-        $this->_adapter->select($this->_entityTable, "id = $id");
-        if ($data = $this->_adapter->fetch()) {
-            return $data;
-        }
-        return null;
-    }
-
+    
     public function find($query='',$values='')
     {   
         $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values));

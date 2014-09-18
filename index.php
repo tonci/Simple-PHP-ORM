@@ -1,7 +1,6 @@
 <?php
 require_once "lib/init.php";
-$company = new Company;
-//print_r($company->findById(1));
+//$company = new Company;
 //print_r($company->findAll('name=:name',array(':name'=>'Izdirvam.bg')));
 //print_r($company->findAll());
 
@@ -20,7 +19,23 @@ $company = new Company;
 
 // INSERT
 //$company->id = 11;
-$company->name = "teste2";
-$company->email = 'teste@3terst123.com';
-$company->phone = '088634823734';
-print_r($company->save());
+// $company->name = "teste2";
+// $company->email = 'teste@3terst123.com';
+// $company->phone = '088634823734';
+// print_r($company->save());
+
+
+//TEST ADDRESS
+//$address = new Address;
+//print_r($address->findByCountry('Bulgaria'));
+
+//insert
+// $address->country = 'Bulgaria';
+// $address->street_name = 'Ivan Asen';
+// $address->street_number = 54;
+// $address->street_number_addition = 'a';
+// $address->zip_id = 1;
+// $address->save();
+
+//delete
+//$address->delete('street_number=:number', array(':number'=>54));
