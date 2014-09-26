@@ -1,7 +1,13 @@
 <?php
 require_once "lib/init.php";
-//$company = new Company;
-//print_r($company->findAll('name=:name',array(':name'=>'Izdirvam.bg')));
+
+$product = new Product;
+// $product->product_name = 'New mega cool product';
+/* $product->save(); */
+print_r($product->findAll());
+
+$company = new Company;
+print_r($company->findAll('name=:name',array(':name'=>'Izdirvam.bg')));
 //print_r($company->findAll());
 
 // $company->id = 123;

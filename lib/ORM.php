@@ -7,7 +7,8 @@ class ORM {
 
     public function __construct()
     {
-        $this->_adapter = new MysqlAdapter(array('localhost', 'root', '', 'chaos'));
+        //$this->_adapter = new MysqlAdapter(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks'));
+        $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks'));
         $this->explinTable();
     }
 
@@ -40,9 +41,9 @@ class ORM {
         }
         return null;
     }
-    
+
     public function find($query='',$values='')
-    {   
+    {
         $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values));
         if ($data = $this->_adapter->fetch()) {
             $this->mapValues($data);
@@ -59,7 +60,7 @@ class ORM {
                 $data[] = $this->_adapter->fetch();
             return $data;
         }
-                    
+
         return null;
     }
 

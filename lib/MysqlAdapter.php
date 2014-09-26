@@ -4,11 +4,12 @@ class MysqlAdapter
     protected $_config = array();
     protected $_link;
     protected $_result;
+    private static $instance;
 
     public function __construct(array $config)
     {
         if (count($config) !== 4) {
-            throw new InvalidArgumentException('Invalid number of connection parameters.');  
+            throw new InvalidArgumentException('Invalid number of connection parameters.');
         }
         $this->_config = $config;
     }
@@ -17,6 +18,7 @@ class MysqlAdapter
     {
         // connect only once
         if ($this->_link === null) {
+            echo "test<br />";
             list($host, $user, $password, $database) = $this->_config;
             if (!$this->_link = @mysqli_connect($host, $user, $password, $database)) {
                 throw new RuntimeException('Error connecting to the server : ' . mysqli_connect_error());
@@ -24,6 +26,13 @@ class MysqlAdapter
             unset($host, $user, $password, $database);
         }
         return $this->_link;
+    }
+
+    static public function getInstance(array $config){
+        if(!self::$instance){
+            self::$instance = new MysqlAdapter($config);
+        }
+        return self::$instance;
     }
 
     public function query($query)
@@ -34,7 +43,7 @@ class MysqlAdapter
         // lazy connect to MySQL
         $this->connect();
         if (!$this->_result = mysqli_query($this->_link, $query)) {
-            throw new RuntimeException('Error executing the specified query ' . $query . mysqli_error($this->_link));   
+            throw new RuntimeException('Error executing the specified query ' . $query . mysqli_error($this->_link));
         }
         return $this->_result;
     }
@@ -46,7 +55,7 @@ class MysqlAdapter
                . (($limit) ? ' LIMIT ' . $limit : '')
                . (($offset && $limit) ? ' OFFSET ' . $offset : '')
                . (($order) ? ' ORDER BY ' . $order : '');
-               
+
         $this->query($query);
         return $this->countRows();
     }
@@ -70,7 +79,7 @@ class MysqlAdapter
         $query = 'UPDATE ' . $table . ' SET ' . $set
                . (($where) ? ' WHERE ' . $where : '');
         $this->query($query);
-        return $this->getAffectedRows(); 
+        return $this->getAffectedRows();
     }
 
     public function insertUpdate($table, array $data, array $keys)
@@ -82,7 +91,7 @@ class MysqlAdapter
                 $set[] = $field . '=' . $this->quoteValue($value);
         }
         $set = implode(',', $set);
-        
+
         $query = 'INSERT INTO ' . $table . ' (' . $fields . ') ' . ' VALUES (' . $values . ')
                     ON DUPLICATE KEY UPDATE '.$set;
         $this->query($query);
@@ -113,7 +122,7 @@ class MysqlAdapter
     {
         return mysqli_real_escape_string($this->_link, $value);
     }
-   
+
     /**
      * Fetch a single row from the current result set (as an associative array)
      */
@@ -134,18 +143,18 @@ class MysqlAdapter
     public function getInsertId()
     {
         return $this->_link !== null
-            ? mysqli_insert_id($this->_link) : null; 
+            ? mysqli_insert_id($this->_link) : null;
     }
-   
+
     /**
      * Get the number of rows returned by the current result set
-     */ 
+     */
     public function countRows()
     {
         return $this->_result !== null
             ? mysqli_num_rows($this->_result) : 0;
     }
-   
+
     /**
      * Get the number of affected rows
      */
@@ -154,7 +163,7 @@ class MysqlAdapter
         return $this->_link !== null
             ? mysqli_affected_rows($this->_link) : 0;
     }
-   
+
     /**
      * Free up the current result set
      */
@@ -166,7 +175,7 @@ class MysqlAdapter
         mysqli_free_result($this->_result);
         return true;
     }
-   
+
     /**
      * Close explicitly the database connection
      */
@@ -179,7 +188,7 @@ class MysqlAdapter
         $this->_link = null;
         return true;
     }
-   
+
     /**
      * Close automatically the database connection when the instance of the class is destroyed
      */
