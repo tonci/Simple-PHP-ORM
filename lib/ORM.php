@@ -9,8 +9,8 @@ class ORM {
     public function __construct()
     {
         //$this->_adapter = new MysqlAdapter(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks'));
-        //$this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks')); //Chaos DB
-        $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'root', '', 'chaos'));
+        $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks')); //Chaos DB
+        //$this->_adapter = MysqlAdapter::getInstance(array('localhost', 'root', '', 'chaos')); //local DB
         $this->explinTable();
         
     }
