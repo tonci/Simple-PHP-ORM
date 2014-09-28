@@ -1,17 +1,33 @@
 <?php
 abstract class Validator{
 
+    public $errors;
+
     public static $builtInValidators=array(
-        'required'=>'RequiredValidator',
+        'date' => 'DateValidator',
         'email'=>'EmailValidator',
-        'length'=>'StringValidator',
+        'string'=>'StringValidator',
         'numerical'=>'NumberValidator',
     );
 
-    abstract protected function validateAttribute($value, $options);
+    abstract protected function validateAttribute($value);
 
     public function createValidator($value='')
     {
-        
-    }    
+        // Default create validator function (for non db related validation)
+    }
+    public function addError($error_string)
+    {
+        $this->errors[] = $error_string;
+    }
+
+    public function removeErrors()
+    {
+        $this->errors = array();
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
+    }
 }

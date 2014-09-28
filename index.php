@@ -1,16 +1,24 @@
 <?php
 require_once "lib/init.php";
 
-$product = new Product;
+//$product = new Product;
 // $product->product_name = 'New mega cool product';
 /* $product->save(); */
-$product->validate(new DBValidator);
-exit;
-print_r($product->findAll());
+// $product->id = 12.5;
+// $product->product_name = 'qwertyuiop qwertyuiop qwertyuiop qwertyuiop qwertyuiop';
+// $product->product_discount = 'asd';
+
+//print_r($product->findAll());
 
 $company = new Company;
-print_r($company->findAll('name=:name',array(':name'=>'Izdirvam.bg')));
-//print_r($company->findAll());
+$company->id = 12.5;
+$company->name = 234234;
+$company->email = 'test';
+if(!$company->save()){
+    print_r($company->getErrors());
+}
+//print_r($company->findAll('name=:name',array(':name'=>'Izdirvam.bg')));
+//print_r($company->findAll('','',' name DESC ',2, 2));
 
 // $company->id = 123;
 // print_r($company);

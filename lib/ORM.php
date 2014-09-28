@@ -4,6 +4,7 @@ class ORM {
     protected $_entityTable;
     protected $_fieldsDetails;
     public $fields;
+    public $errors;
 
     public function __construct()
     {
@@ -44,9 +45,11 @@ class ORM {
         return null;
     }
 
-    public function find($query='',$values='')
+    public function find($query='',$values='', $order = '', $limit = null, $offset = null)
     {
-        $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values));
+        if ($limit) $limit = (int)$limit;
+        if ($offset) $offset = (int)$offset;
+        $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values), '*', $this->_adapter->escape($order), $limit, $offset);
         if ($data = $this->_adapter->fetch()) {
             $this->mapValues($data);
             return $data;
@@ -54,9 +57,11 @@ class ORM {
         return null;
     }
 
-    public function findAll($query='', $values='')
+    public function findAll($query='', $values='', $order = '', $limit = null, $offset = null)
     {
-        $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values));
+        if ($limit) $limit = (int)$limit;
+        if ($offset) $offset = (int)$offset;
+        $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values), '*', $this->_adapter->escape($order), $limit, $offset);
         if ($numRows = $this->_adapter->countRows()){
             for ($i = 0; $i<$numRows; $i++)
                 $data[] = $this->_adapter->fetch();
@@ -89,15 +94,16 @@ class ORM {
         if ($this->validate()) {
             return $this->_adapter->insertUpdate($this->_entityTable, (array)$this->fields, (array)$this->getPK());
         }
+
+        return false;
     }
 
-    // TODO VALIDATION
     public function validate()
     {
-        
-        $Validator = new DBValidator;
-        $Validator->createValidators($this->_fieldsDetails);
-        return true;
+
+        $Validator = new DBValidator($this, $this->_fieldsDetails);
+        $Validator->validate();
+        return empty($this->errors);
     }
 
     // TODO custome rules that should applly to validation
@@ -133,6 +139,28 @@ class ORM {
         }
 
         return $query;
+    }
+
+    public function addError($attribute, $errors)
+    {    
+        foreach ((array)$errors as $error_message) {
+            $this->errors[$attribute][] = $error_message;
+        }
+    
+    }
+
+    public function removeErrors($attribute=null)
+    {
+        if ($attribute){
+            unset($this->errors[$attribute]);
+        }else{
+            $this->errors = array();
+        }
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
     }
 
     public function explinTable()
