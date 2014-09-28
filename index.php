@@ -4,6 +4,8 @@ require_once "lib/init.php";
 $product = new Product;
 // $product->product_name = 'New mega cool product';
 /* $product->save(); */
+$product->validate(new DBValidator);
+exit;
 print_r($product->findAll());
 
 $company = new Company;

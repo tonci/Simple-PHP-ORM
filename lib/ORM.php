@@ -8,8 +8,10 @@ class ORM {
     public function __construct()
     {
         //$this->_adapter = new MysqlAdapter(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks'));
-        $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks'));
+        //$this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks')); //Chaos DB
+        $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'root', '', 'chaos'));
         $this->explinTable();
+        
     }
 
     public function __get($name)
@@ -90,8 +92,11 @@ class ORM {
     }
 
     // TODO VALIDATION
-    public function validate($value='')
+    public function validate()
     {
+        
+        $Validator = new DBValidator;
+        $Validator->createValidators($this->_fieldsDetails);
         return true;
     }
 

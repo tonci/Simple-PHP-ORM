@@ -18,7 +18,6 @@ class MysqlAdapter
     {
         // connect only once
         if ($this->_link === null) {
-            echo "test<br />";
             list($host, $user, $password, $database) = $this->_config;
             if (!$this->_link = @mysqli_connect($host, $user, $password, $database)) {
                 throw new RuntimeException('Error connecting to the server : ' . mysqli_connect_error());
