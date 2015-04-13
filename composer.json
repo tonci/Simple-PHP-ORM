@@ -1,0 +1,14 @@
+{
+    "name": "tonci/SimpleORM",
+    "type": "library",
+    "description": "Simple ORM for PHP 5.4",
+    "homepage": "https://github.com/tonci/Simple-PHP-ORM",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "SimpleORM": "src"
+        }
+    }
+}
