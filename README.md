@@ -9,4 +9,4 @@ TODO
  - Add configuration options
 
 SET UP
-- In oreder to set the database connection credentials, details need to be set in ORM class (lib/ORM.php).
+- In oreder to set up the database connection credentials, details needs to be set in ORM class (lib/ORM.php).
