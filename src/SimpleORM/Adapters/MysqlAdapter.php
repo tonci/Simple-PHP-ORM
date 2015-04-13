@@ -1,4 +1,7 @@
 <?php
+
+namespace SimpleORM\Adapters;
+
 class MysqlAdapter
 {
     protected $_config = array();
@@ -134,6 +137,17 @@ class MysqlAdapter
             return $row;
         }
         return false;
+    }
+
+    public function fetchAll()
+    {
+        if ($numRows = $this->countRows()){
+            for ($i = 0; $i<$numRows; $i++){
+                $data[] = $this->fetch();
+            }
+            return $data;
+        }
+        return [];
     }
 
     /**

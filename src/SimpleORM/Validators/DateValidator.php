@@ -1,4 +1,7 @@
 <?php
+
+namespace SimpleORM\Validators;
+
 class DateValidator extends Validator {
 
     public $allowEmpty=true;

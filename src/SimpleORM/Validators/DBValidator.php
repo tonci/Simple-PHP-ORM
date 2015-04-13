@@ -1,4 +1,7 @@
 <?php
+
+namespace SimpleORM\Validators;
+
 class DBValidator extends Validator {
 
     private $object;

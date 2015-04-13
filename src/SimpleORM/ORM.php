@@ -1,4 +1,10 @@
 <?php
+
+namespace SimpleORM;
+
+use SimpleORM\Adapters;
+use SimpleORM\Validators;
+
 class ORM {
     private $_adapter;
     protected $_entityTable;
@@ -9,10 +15,9 @@ class ORM {
     public function __construct()
     {
         //$this->_adapter = new MysqlAdapter(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks'));
-        $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks')); //Chaos DB
-        //$this->_adapter = MysqlAdapter::getInstance(array('localhost', 'root', '', 'chaos')); //local DB
+        // $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks')); //Chaos DB
+        $this->_adapter = Adapters\MysqlAdapter::getInstance(array('localhost', 'root', '', 'chaos')); //local DB
         $this->explinTable();
-        
     }
 
     public function __get($name)
@@ -62,13 +67,20 @@ class ORM {
         if ($limit) $limit = (int)$limit;
         if ($offset) $offset = (int)$offset;
         $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values), '*', $this->_adapter->escape($order), $limit, $offset);
-        if ($numRows = $this->_adapter->countRows()){
-            for ($i = 0; $i<$numRows; $i++)
-                $data[] = $this->_adapter->fetch();
+        $results = $this->_adapter->fetchAll();
+
+        if ($results) {
+            $index = 0;
+            $class_name = get_class($this);
+            foreach ($results as $result) {
+                $data[$index] = new $class_name;
+                $data[$index]->mapValues($result);
+                $index++;
+            }
             return $data;
         }
 
-        return null;
+        return [];
     }
 
     public function delete($where='',$values='')
@@ -167,7 +179,7 @@ class ORM {
     {
         $this->_adapter->query('EXPLAIN '.$this->_entityTable);
         if ($numRows = $this->_adapter->countRows()){
-            $this->fields = new stdClass;
+            $this->fields = new \stdClass;
             for ($i = 0; $i<$numRows; $i++){
                 $row = $this->_adapter->fetch();
                 $this->_fieldsDetails[$row['Field']] = $row;

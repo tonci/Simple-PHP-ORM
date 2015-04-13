@@ -1,4 +1,7 @@
 <?php
+
+namespace SimpleORM\Validators;
+
 abstract class Validator{
 
     public $errors;

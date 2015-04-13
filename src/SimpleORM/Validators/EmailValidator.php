@@ -1,4 +1,7 @@
 <?php
+
+namespace SimpleORM\Validators;
+
 class EmailValidator extends Validator {
 
     public function validateAttribute($attribute)

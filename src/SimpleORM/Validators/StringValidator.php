@@ -1,4 +1,7 @@
 <?php
+
+namespace SimpleORM\Validators;
+
 class StringValidator extends Validator {
 
     public $allowEmpty=true;
