@@ -1,5 +1,5 @@
 {
-    "name": "tonci/SimpleORM",
+    "name": "tonci/simple-orm",
     "type": "library",
     "description": "Simple ORM for PHP 5.4",
     "homepage": "https://github.com/tonci/Simple-PHP-ORM",
