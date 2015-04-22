@@ -1,5 +1,4 @@
 <?php
-
 namespace SimpleORM\Validators;
 
 class NumberValidator extends Validator {

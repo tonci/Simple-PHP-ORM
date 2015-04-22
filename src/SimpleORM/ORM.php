@@ -11,12 +11,10 @@ class ORM {
     protected $_fieldsDetails;
     public $fields;
     public $errors;
+    public static $_explained_tables;
 
     public function __construct()
     {
-        //$this->_adapter = new MysqlAdapter(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks'));
-        // $this->_adapter = MysqlAdapter::getInstance(array('localhost', 'phpdev', 'phpdev@mysql', 'chaos_tasks')); //Chaos DB
-        $this->_adapter = Adapters\MysqlAdapter::getInstance(array('localhost', 'root', '', 'chaos')); //local DB
         $this->explinTable();
     }
 
@@ -35,6 +33,11 @@ class ORM {
         }else{
             $this->{$name} = $value;
         }
+    }
+
+    public function __isset($name)
+    {
+        return isset($this->fields->{$name})||isset($this->{$name});
     }
 
     public function __call($name, $arguments)
@@ -62,11 +65,12 @@ class ORM {
         return null;
     }
 
-    public function findAll($query='', $values='', $order = '', $limit = null, $offset = null)
+    public function findAll($query='', $values='', $order = '', $limit = null, $offset = null, $count_all = false)
     {
         if ($limit) $limit = (int)$limit;
         if ($offset) $offset = (int)$offset;
-        $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values), '*', $this->_adapter->escape($order), $limit, $offset);
+        
+        $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values), '*', $this->_adapter->escape($order), $limit, $offset, $count_all);
         $results = $this->_adapter->fetchAll();
 
         if ($results) {
@@ -81,6 +85,16 @@ class ORM {
         }
 
         return [];
+    }
+
+    public function countAll($query='', $values='')
+    {
+        return $this->_adapter->select($this->_entityTable, $this->matchValues($query,$values));
+    }
+
+    public function foundRows()
+    {
+        return $this->_adapter->foundRows();
     }
 
     public function delete($where='',$values='')
@@ -112,8 +126,7 @@ class ORM {
 
     public function validate()
     {
-
-        $Validator = new DBValidator($this, $this->_fieldsDetails);
+        $Validator = new Validators\DBValidator($this, $this->_fieldsDetails);
         $Validator->validate();
         return empty($this->errors);
     }
@@ -170,21 +183,55 @@ class ORM {
         }
     }
 
-    public function getErrors()
+    public function hasError($attribute)
     {
-        return $this->errors;
+        return !empty($this->errors[$attribute]);
+    }
+
+    public function hasErrors()
+    {
+        return !empty($this->errors);
+    }
+
+    public function escapeString($value)
+    {
+        return $this->_adapter->escape($value);
+    }
+
+    public function getError($attribute)
+    {
+        if (!empty($this->errors[$attribute])) {
+            return implode(',<br />', $this->errors[$attribute]);
+        }
+        return '';
+    }
+
+    public function getErrors($attribute='')
+    {
+        if (empty($attribute)) {
+            return $this->errors;
+        }else{
+            if (!empty($this->errors[$attribute])) {
+                return $this->errors[$attribute];
+            }else{
+                return [];
+            }
+        }
     }
 
     public function explinTable()
     {
-        $this->_adapter->query('EXPLAIN '.$this->_entityTable);
-        if ($numRows = $this->_adapter->countRows()){
-            $this->fields = new \stdClass;
-            for ($i = 0; $i<$numRows; $i++){
-                $row = $this->_adapter->fetch();
-                $this->_fieldsDetails[$row['Field']] = $row;
-                $this->fields->$row['Field'] = '';
+        if (empty(self::$_explained_tables[$this->_entityTable])) {
+            $this->_adapter->query('EXPLAIN '.$this->_entityTable);
+            if ($numRows = $this->_adapter->countRows()){
+                self::$_explained_tables[$this->_entityTable] = $this->_adapter->fetchAll();
             }
+        }
+
+        $this->fields = new \stdClass;
+        foreach (self::$_explained_tables[$this->_entityTable] as $key => $row) {
+            $this->_fieldsDetails[$row['Field']] = $row;
+            $this->fields->$row['Field'] = '';
         }
     }
 }

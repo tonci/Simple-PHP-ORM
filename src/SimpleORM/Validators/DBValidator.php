@@ -1,6 +1,11 @@
 <?php
 
 namespace SimpleORM\Validators;
+// use SimpleORM\Validators\NumberValidator;
+// use SimpleORM\Validators\StringValidator;
+// use SimpleORM\Validators\DateValidator;
+// use SimpleORM\Validators\EmailValidator;
+// require (__DIR__.'/NumberValidator.php');
 
 class DBValidator extends Validator {
 
@@ -12,7 +17,7 @@ class DBValidator extends Validator {
         'smallint'=>'NumberValidator',
         'mediumint'=>'NumberValidator',
         'int'=>'NumberValidator',
-        'bigint'=>'NumberValidator',
+        'bigint'=>"NumberValidator",
         'decimal'=>'NumberValidator',
         'flaot'=>'NumberValidator',
         'double'=>'NumberValidator',
@@ -62,9 +67,10 @@ class DBValidator extends Validator {
         $validators = array();
         foreach ($this->attributesDetails as $name => $attributes) {
             preg_match('/^(?P<type>\w+)\(?(?P<limit>\d+)?,?(\d+)?\)?/', $attributes['Type'], $type_properties);
-            if (!empty($type_properties)) {
-                $validator = new self::$DBBuiltInValidators[strtolower($type_properties['type'])];
+            if (!empty($type_properties)) { 
                 
+                $class = __NAMESPACE__.'\\'.self::$DBBuiltInValidators[strtolower($type_properties['type'])];
+                $validator = new $class();
                 //Empty restriction
                 if (strtolower($attributes['Null']) == 'no' && strpos($attributes['Extra'], 'auto_increment') === false) {
                     $validator->allowEmpty = false;

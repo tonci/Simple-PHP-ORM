@@ -2,30 +2,23 @@
 
 namespace SimpleORM\Adapters;
 
-class MysqlAdapter
+class MysqlAdapter extends Adapter
 {
-    protected $_config = array();
     protected $_link;
-    protected $_result;
-    private static $instance;
-
-    public function __construct(array $config)
-    {
-        if (count($config) !== 4) {
-            throw new InvalidArgumentException('Invalid number of connection parameters.');
-        }
-        $this->_config = $config;
-    }
+    protected $_result;    
 
     public function connect()
     {
         // connect only once
         if ($this->_link === null) {
-            list($host, $user, $password, $database) = $this->_config;
-            if (!$this->_link = @mysqli_connect($host, $user, $password, $database)) {
+            if (empty($this->host)) throw new \InvalidArgumentException("Database host not specified.");
+            if (empty($this->user)) throw new \InvalidArgumentException("Database user not specified.");
+            if (empty($this->database)) throw new \InvalidArgumentException("Database name not specified.");
+            
+            if (!$this->_link = @mysqli_connect($this->host, $this->user, $this->password, $this->database)) {
                 throw new RuntimeException('Error connecting to the server : ' . mysqli_connect_error());
             }
-            unset($host, $user, $password, $database);
+            $this->query('SET NAMES '.$this->charset);
         }
         return $this->_link;
     }
@@ -42,17 +35,18 @@ class MysqlAdapter
         if (!is_string($query) || empty($query)) {
             throw new InvalidArgumentException('The specified query is not valid.');
         }
+
         // lazy connect to MySQL
         $this->connect();
         if (!$this->_result = mysqli_query($this->_link, $query)) {
-            throw new RuntimeException('Error executing the specified query ' . $query . mysqli_error($this->_link));
+            throw new \RuntimeException('Error executing the specified query ' . $query . mysqli_error($this->_link));
         }
         return $this->_result;
     }
 
-    public function select($table, $where = '', $fields = '*', $order = '', $limit = null, $offset = null)
+    public function select($table, $where = '', $fields = '*', $order = '', $limit = null, $offset = null, $count_all = false)
     {
-        $query = 'SELECT ' . $fields . ' FROM ' . $table
+        $query = 'SELECT '. ($count_all ? 'SQL_CALC_FOUND_ROWS ' : '') . $fields . ' FROM ' . $table
                . (($where) ? ' WHERE ' . $where : '')
                . (($order) ? ' ORDER BY ' . $order : '')
                . (($limit) ? ' LIMIT ' . $limit : '')
@@ -60,6 +54,15 @@ class MysqlAdapter
 
         $this->query($query);
         return $this->countRows();
+    }
+
+    public function countAll($table, $where = '')
+    {
+        $query = 'SELECT count(*) FROM ' . $table
+               . (($where) ? ' WHERE ' . $where : '');
+               
+        $this->query($query);
+        return array_pop($this->fetch());  
     }
 
     public function insert($table, array $data)
@@ -114,15 +117,21 @@ class MysqlAdapter
         if ($value === null) {
             $value = 'NULL';
         }
-        else if (!is_numeric($value)) {
-            $value = "'" . mysqli_real_escape_string($this->_link, $value) . "'";
-        }
+        // else if (!is_numeric($value)) {
+            $value = "'" . $this->escape($value) . "'";
+        // }
         return $value;
     }
 
     public function escape($value)
     {
         return mysqli_real_escape_string($this->_link, $value);
+    }
+
+    public function foundRows()
+    {
+        $this->query('SELECT FOUND_ROWS()');
+        return array_pop($this->fetch());
     }
 
     /**
