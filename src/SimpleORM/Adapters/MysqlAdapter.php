@@ -100,7 +100,7 @@ class MysqlAdapter extends Adapter
         $query = 'INSERT INTO ' . $table . ' (' . $fields . ') ' . ' VALUES (' . $values . ')
                     ON DUPLICATE KEY UPDATE '.$set;
         $this->query($query);
-        return $this->getInsertId();
+        return ($this->getInsertId() ? $this->getInsertId() : $ok);
     }
 
     public function delete($table, $where = '')
